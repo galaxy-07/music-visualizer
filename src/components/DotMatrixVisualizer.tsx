@@ -16,28 +16,44 @@ const DotMatrixVisualizer: React.FC<DotMatrixVisualizerProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number>();
+  const lastBeatTimeRef = useRef<number>(0);
 
-  // Tone color mapping
-  const toneColors = useMemo(() => ({
-    happy: { r: 255, g: 193, b: 7 },      // Golden yellow
-    sad: { r: 59, g: 130, b: 246 },       // Blue
-    energetic: { r: 239, g: 68, b: 68 },  // Red
-    calm: { r: 34, g: 197, b: 94 },       // Green
-    angry: { r: 220, g: 38, b: 127 },     // Pink
-    neutral: { r: 156, g: 163, b: 175 },  // Gray
-  }), []);
-
+  // Get the closest beat to current time for intensity calculation
   const getCurrentBeatIntensity = () => {
-    if (!beats.length) return 0;
+    if (!beats.length || !isPlaying) return 0;
     
     // Find the closest beat to current time
-    const closestBeat = beats.reduce((prev, curr) => 
-      Math.abs(curr - currentTime) < Math.abs(prev - currentTime) ? curr : prev
-    );
+    let closestBeat = beats[0];
+    let minDiff = Math.abs(currentTime - beats[0]);
     
+    for (const beat of beats) {
+      const diff = Math.abs(currentTime - beat);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestBeat = beat;
+      }
+    }
+    
+    // Create a pulse effect that's strongest right at the beat
     const timeDiff = Math.abs(currentTime - closestBeat);
-    // Create a pulse effect that fades over 0.2 seconds
-    return timeDiff < 0.2 ? Math.max(0, 1 - (timeDiff / 0.2)) : 0;
+    if (timeDiff < 0.15) {
+      return Math.max(0, 1 - (timeDiff / 0.15));
+    }
+    return 0;
+  };
+
+  // Get tone-based intensity multiplier
+  const getToneIntensity = () => {
+    const intensityMap: { [key: string]: number } = {
+      happy: 0.9,
+      energetic: 1.0,
+      sad: 0.4,
+      melancholy: 0.3,
+      calm: 0.6,
+      angry: 0.95,
+      neutral: 0.5,
+    };
+    return intensityMap[currentTone] || 0.5;
   };
 
   const draw = () => {
@@ -50,15 +66,45 @@ const DotMatrixVisualizer: React.FC<DotMatrixVisualizerProps> = ({
     const width = canvas.width;
     const height = canvas.height;
     const gridSize = 20;
-    const dotSize = (width / gridSize) * 0.6;
+    const dotSize = (width / gridSize) * 0.4;
     const spacing = width / gridSize;
 
-    // Clear canvas
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    // Clear canvas with black background
+    ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, width, height);
 
-    const baseColor = toneColors[currentTone as keyof typeof toneColors] || toneColors.neutral;
     const beatIntensity = getCurrentBeatIntensity();
+    const toneIntensity = getToneIntensity();
+    
+    // Create different patterns based on tone
+    const getPatternForTone = (row: number, col: number, time: number) => {
+      switch (currentTone) {
+        case 'happy':
+        case 'energetic':
+          // Radial waves from center
+          const centerX = gridSize / 2;
+          const centerY = gridSize / 2;
+          const distance = Math.sqrt((col - centerX) ** 2 + (row - centerY) ** 2);
+          return Math.sin(time * 3 - distance * 0.5) * 0.5 + 0.5;
+          
+        case 'sad':
+        case 'melancholy':
+          // Slow vertical waves
+          return Math.sin(time * 1.5 + row * 0.3) * 0.3 + 0.3;
+          
+        case 'calm':
+          // Gentle horizontal ripples
+          return Math.sin(time * 2 + col * 0.2) * 0.4 + 0.4;
+          
+        case 'angry':
+          // Chaotic pattern
+          return Math.sin(time * 4 + row * 0.4) * Math.cos(time * 3 + col * 0.3) * 0.6 + 0.6;
+          
+        default:
+          // Simple diagonal wave
+          return Math.sin(time * 2 + (row + col) * 0.2) * 0.4 + 0.4;
+      }
+    };
 
     // Draw dots
     for (let row = 0; row < gridSize; row++) {
@@ -66,33 +112,37 @@ const DotMatrixVisualizer: React.FC<DotMatrixVisualizerProps> = ({
         const x = col * spacing + spacing / 2;
         const y = row * spacing + spacing / 2;
 
-        // Add some randomness and wave effect
-        const wave = Math.sin(currentTime * 2 + row * 0.1 + col * 0.1) * 0.3;
-        const random = Math.random() * 0.2;
+        // Calculate base opacity from pattern
+        let opacity = getPatternForTone(row, col, currentTime);
         
-        // Calculate opacity based on position, time, and beat
-        let opacity = 0.3 + wave + random;
-        if (isPlaying) {
-          opacity += beatIntensity * 0.7;
+        // Apply tone intensity
+        opacity *= toneIntensity;
+        
+        // Add beat pulse effect
+        if (beatIntensity > 0) {
+          const beatPulse = beatIntensity * 0.8;
+          opacity += beatPulse;
         }
+        
+        // Ensure opacity is within valid range
         opacity = Math.max(0.1, Math.min(1, opacity));
 
         // Calculate size with beat effect
         let currentDotSize = dotSize;
-        if (isPlaying && beatIntensity > 0) {
-          currentDotSize *= (1 + beatIntensity * 0.5);
+        if (beatIntensity > 0.3) {
+          currentDotSize *= (1 + beatIntensity * 0.4);
         }
 
-        // Draw dot
-        ctx.fillStyle = `rgba(${baseColor.r}, ${baseColor.g}, ${baseColor.b}, ${opacity})`;
+        // Draw white dot with calculated opacity
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
         ctx.beginPath();
         ctx.arc(x, y, currentDotSize / 2, 0, Math.PI * 2);
         ctx.fill();
 
-        // Add glow effect for beats
-        if (beatIntensity > 0.5) {
-          ctx.shadowBlur = 10 + beatIntensity * 20;
-          ctx.shadowColor = `rgba(${baseColor.r}, ${baseColor.g}, ${baseColor.b}, ${beatIntensity})`;
+        // Add glow effect for strong beats
+        if (beatIntensity > 0.6) {
+          ctx.shadowBlur = 15 * beatIntensity;
+          ctx.shadowColor = `rgba(255, 255, 255, ${beatIntensity * 0.8})`;
           ctx.beginPath();
           ctx.arc(x, y, currentDotSize / 2, 0, Math.PI * 2);
           ctx.fill();
@@ -118,6 +168,11 @@ const DotMatrixVisualizer: React.FC<DotMatrixVisualizerProps> = ({
       canvas.height = size;
     }
 
+    // Cancel previous animation frame
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+
     draw();
 
     return () => {
@@ -131,7 +186,7 @@ const DotMatrixVisualizer: React.FC<DotMatrixVisualizerProps> = ({
     <div className="flex justify-center">
       <canvas
         ref={canvasRef}
-        className="border border-slate-600 rounded-lg bg-black/30"
+        className="border border-gray-600 rounded-lg bg-black"
         style={{ maxWidth: '100%', height: 'auto' }}
       />
     </div>

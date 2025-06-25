@@ -31,22 +31,41 @@ const Index = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const handleFileUpload = useCallback(async (file: File) => {
+    // Reset analysis data when new file is uploaded
+    setAnalysisData(null);
+    setCurrentTime(0);
+    setDuration(0);
+    setIsPlaying(false);
+    
     setAudioFile(file);
     const url = URL.createObjectURL(file);
     setAudioUrl(url);
     setIsAnalyzing(true);
     
-    // Simulate analysis - in real implementation, this would call the analysis APIs
+    // Generate different analysis based on file name for demo purposes
     setTimeout(() => {
-      const mockAnalysis: AnalysisData = {
+      const isSadSong = file.name.toLowerCase().includes('sad');
+      
+      const mockAnalysis: AnalysisData = isSadSong ? {
+        toneSegments: [
+          { start: 0, end: 25, tone: 'sad', confidence: 0.9 },
+          { start: 25, end: 50, tone: 'melancholy', confidence: 0.8 },
+          { start: 50, end: 75, tone: 'sad', confidence: 0.85 },
+          { start: 75, end: 100, tone: 'neutral', confidence: 0.6 },
+        ],
+        beats: Array.from({ length: 150 }, (_, i) => i * 0.67), // Slower beats for sad song
+        duration: 120
+      } : {
         toneSegments: [
           { start: 0, end: 30, tone: 'happy', confidence: 0.8 },
-          { start: 30, end: 60, tone: 'sad', confidence: 0.7 },
-          { start: 60, end: 90, tone: 'energetic', confidence: 0.9 },
+          { start: 30, end: 60, tone: 'energetic', confidence: 0.9 },
+          { start: 60, end: 90, tone: 'happy', confidence: 0.75 },
+          { start: 90, end: 120, tone: 'calm', confidence: 0.7 },
         ],
-        beats: Array.from({ length: 200 }, (_, i) => i * 0.5), // Beat every 0.5 seconds
+        beats: Array.from({ length: 240 }, (_, i) => i * 0.5), // Faster beats for upbeat song
         duration: 120
       };
+      
       setAnalysisData(mockAnalysis);
       setIsAnalyzing(false);
     }, 3000);
@@ -88,13 +107,13 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">
             Music Emotion Visualizer
           </h1>
-          <p className="text-slate-300 text-lg">
+          <p className="text-gray-400 text-lg">
             Upload an MP3 file to see its emotional journey through interactive visualization
           </p>
         </div>
@@ -102,7 +121,7 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Upload and Controls Section */}
           <div className="space-y-6">
-            <Card className="p-6 bg-black/20 border-slate-700">
+            <Card className="p-6 bg-gray-900 border-gray-700">
               <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
                 <Upload className="w-5 h-5" />
                 Audio Upload
@@ -111,8 +130,8 @@ const Index = () => {
               
               {isAnalyzing && (
                 <div className="mt-4 text-center">
-                  <div className="inline-flex items-center gap-2 text-blue-400">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
+                  <div className="inline-flex items-center gap-2 text-white">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                     Analyzing audio...
                   </div>
                 </div>
@@ -120,7 +139,7 @@ const Index = () => {
             </Card>
 
             {audioFile && (
-              <Card className="p-6 bg-black/20 border-slate-700">
+              <Card className="p-6 bg-gray-900 border-gray-700">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <Volume2 className="w-5 h-5" />
                   Playback Controls
@@ -132,17 +151,17 @@ const Index = () => {
                       onClick={togglePlayPause}
                       variant="outline"
                       size="lg"
-                      className="bg-white/10 border-slate-600 text-white hover:bg-white/20"
+                      className="bg-white text-black border-white hover:bg-gray-200"
                     >
                       {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                     </Button>
                     
                     <div className="flex-1">
-                      <div className="text-sm text-slate-300 mb-1">
+                      <div className="text-sm text-gray-300 mb-1">
                         Current Tone: <span className="capitalize font-semibold text-white">{getCurrentTone()}</span>
                       </div>
-                      <Progress value={getProgress()} className="h-2" />
-                      <div className="flex justify-between text-xs text-slate-400 mt-1">
+                      <Progress value={getProgress()} className="h-2 bg-gray-700" />
+                      <div className="flex justify-between text-xs text-gray-400 mt-1">
                         <span>{Math.floor(currentTime)}s</span>
                         <span>{Math.floor(duration)}s</span>
                       </div>
@@ -168,7 +187,7 @@ const Index = () => {
 
           {/* Visualization Section */}
           <div>
-            <Card className="p-6 bg-black/20 border-slate-700 h-fit">
+            <Card className="p-6 bg-gray-900 border-gray-700 h-fit">
               <h3 className="text-lg font-semibold text-white mb-4">
                 Dot Matrix Visualization
               </h3>
