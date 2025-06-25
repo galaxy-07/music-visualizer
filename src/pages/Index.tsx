@@ -129,9 +129,7 @@ const Index = () => {
   return <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">
-            Music Emotion Visualizer
-          </h1>
+          <h1 className="text-4xl text-white mb-2 font-bold">Music Visualizer</h1>
           <p className="text-gray-400 text-lg">
             Upload an MP3 file to see its emotional journey through interactive visualization
           </p>
