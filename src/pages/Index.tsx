@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback } from 'react';
 import { Upload, Play, Pause, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,6 @@ import { Progress } from '@/components/ui/progress';
 import FileUploader from '@/components/FileUploader';
 import DotMatrixVisualizer from '@/components/DotMatrixVisualizer';
 import AudioAnalyzer from '@/components/AudioAnalyzer';
-
 interface AnalysisData {
   toneSegments: Array<{
     start: number;
@@ -18,7 +16,6 @@ interface AnalysisData {
   beats: number[];
   duration: number;
 }
-
 const Index = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [audioUrl, setAudioUrl] = useState<string>('');
@@ -27,50 +24,80 @@ const Index = () => {
   const [duration, setDuration] = useState(0);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  
   const audioRef = useRef<HTMLAudioElement>(null);
-
   const handleFileUpload = useCallback(async (file: File) => {
     // Reset analysis data when new file is uploaded
     setAnalysisData(null);
     setCurrentTime(0);
     setDuration(0);
     setIsPlaying(false);
-    
     setAudioFile(file);
     const url = URL.createObjectURL(file);
     setAudioUrl(url);
     setIsAnalyzing(true);
-    
+
     // Generate different analysis based on file name for demo purposes
     setTimeout(() => {
       const isSadSong = file.name.toLowerCase().includes('sad');
-      
       const mockAnalysis: AnalysisData = isSadSong ? {
-        toneSegments: [
-          { start: 0, end: 25, tone: 'sad', confidence: 0.9 },
-          { start: 25, end: 50, tone: 'melancholy', confidence: 0.8 },
-          { start: 50, end: 75, tone: 'sad', confidence: 0.85 },
-          { start: 75, end: 100, tone: 'neutral', confidence: 0.6 },
-        ],
-        beats: Array.from({ length: 150 }, (_, i) => i * 0.67), // Slower beats for sad song
+        toneSegments: [{
+          start: 0,
+          end: 25,
+          tone: 'sad',
+          confidence: 0.9
+        }, {
+          start: 25,
+          end: 50,
+          tone: 'melancholy',
+          confidence: 0.8
+        }, {
+          start: 50,
+          end: 75,
+          tone: 'sad',
+          confidence: 0.85
+        }, {
+          start: 75,
+          end: 100,
+          tone: 'neutral',
+          confidence: 0.6
+        }],
+        beats: Array.from({
+          length: 150
+        }, (_, i) => i * 0.67),
+        // Slower beats for sad song
         duration: 120
       } : {
-        toneSegments: [
-          { start: 0, end: 30, tone: 'happy', confidence: 0.8 },
-          { start: 30, end: 60, tone: 'energetic', confidence: 0.9 },
-          { start: 60, end: 90, tone: 'happy', confidence: 0.75 },
-          { start: 90, end: 120, tone: 'calm', confidence: 0.7 },
-        ],
-        beats: Array.from({ length: 240 }, (_, i) => i * 0.5), // Faster beats for upbeat song
+        toneSegments: [{
+          start: 0,
+          end: 30,
+          tone: 'happy',
+          confidence: 0.8
+        }, {
+          start: 30,
+          end: 60,
+          tone: 'energetic',
+          confidence: 0.9
+        }, {
+          start: 60,
+          end: 90,
+          tone: 'happy',
+          confidence: 0.75
+        }, {
+          start: 90,
+          end: 120,
+          tone: 'calm',
+          confidence: 0.7
+        }],
+        beats: Array.from({
+          length: 240
+        }, (_, i) => i * 0.5),
+        // Faster beats for upbeat song
         duration: 120
       };
-      
       setAnalysisData(mockAnalysis);
       setIsAnalyzing(false);
     }, 3000);
   }, []);
-
   const togglePlayPause = () => {
     if (audioRef.current) {
       if (isPlaying) {
@@ -81,33 +108,25 @@ const Index = () => {
       setIsPlaying(!isPlaying);
     }
   };
-
   const handleTimeUpdate = () => {
     if (audioRef.current) {
       setCurrentTime(audioRef.current.currentTime);
     }
   };
-
   const handleLoadedMetadata = () => {
     if (audioRef.current) {
       setDuration(audioRef.current.duration);
     }
   };
-
   const getCurrentTone = () => {
     if (!analysisData) return 'neutral';
-    const segment = analysisData.toneSegments.find(
-      seg => currentTime >= seg.start && currentTime <= seg.end
-    );
+    const segment = analysisData.toneSegments.find(seg => currentTime >= seg.start && currentTime <= seg.end);
     return segment?.tone || 'neutral';
   };
-
   const getProgress = () => {
-    return duration > 0 ? (currentTime / duration) * 100 : 0;
+    return duration > 0 ? currentTime / duration * 100 : 0;
   };
-
-  return (
-    <div className="min-h-screen bg-black">
+  return <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">
@@ -128,18 +147,15 @@ const Index = () => {
               </h2>
               <FileUploader onFileUpload={handleFileUpload} />
               
-              {isAnalyzing && (
-                <div className="mt-4 text-center">
+              {isAnalyzing && <div className="mt-4 text-center">
                   <div className="inline-flex items-center gap-2 text-white">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                     Analyzing audio...
                   </div>
-                </div>
-              )}
+                </div>}
             </Card>
 
-            {audioFile && (
-              <Card className="p-6 bg-gray-900 border-gray-700">
+            {audioFile && <Card className="p-6 bg-gray-900 border-gray-700">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <Volume2 className="w-5 h-5" />
                   Playback Controls
@@ -147,12 +163,7 @@ const Index = () => {
                 
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <Button
-                      onClick={togglePlayPause}
-                      variant="outline"
-                      size="lg"
-                      className="bg-white text-black border-white hover:bg-gray-200"
-                    >
+                    <Button onClick={togglePlayPause} variant="outline" size="lg" className="bg-white text-black border-white hover:bg-gray-200">
                       {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                     </Button>
                     
@@ -169,40 +180,21 @@ const Index = () => {
                   </div>
                 </div>
 
-                <audio
-                  ref={audioRef}
-                  src={audioUrl}
-                  onTimeUpdate={handleTimeUpdate}
-                  onLoadedMetadata={handleLoadedMetadata}
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
-                />
-              </Card>
-            )}
+                <audio ref={audioRef} src={audioUrl} onTimeUpdate={handleTimeUpdate} onLoadedMetadata={handleLoadedMetadata} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} />
+              </Card>}
 
-            {analysisData && (
-              <AudioAnalyzer data={analysisData} currentTime={currentTime} />
-            )}
+            {analysisData && <AudioAnalyzer data={analysisData} currentTime={currentTime} />}
           </div>
 
           {/* Visualization Section */}
           <div>
             <Card className="p-6 bg-gray-900 border-gray-700 h-fit">
-              <h3 className="text-lg font-semibold text-white mb-4">
-                Dot Matrix Visualization
-              </h3>
-              <DotMatrixVisualizer
-                currentTone={getCurrentTone()}
-                currentTime={currentTime}
-                beats={analysisData?.beats || []}
-                isPlaying={isPlaying}
-              />
+              <h3 className="text-lg font-semibold text-white mb-4"></h3>
+              <DotMatrixVisualizer currentTone={getCurrentTone()} currentTime={currentTime} beats={analysisData?.beats || []} isPlaying={isPlaying} />
             </Card>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
