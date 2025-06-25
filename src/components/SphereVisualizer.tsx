@@ -16,7 +16,7 @@ const AnimatedSphere: React.FC<SphereVisualizerProps> = ({
   beats,
   isPlaying,
 }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
   const pointsRef = useRef<THREE.Points>(null);
 
   // Get the closest beat to current time for intensity calculation
@@ -82,7 +82,7 @@ const AnimatedSphere: React.FC<SphereVisualizerProps> = ({
   }, []);
 
   useFrame((state) => {
-    if (!pointsRef.current || !meshRef.current) return;
+    if (!pointsRef.current || !groupRef.current) return;
 
     const beatIntensity = getCurrentBeatIntensity();
     const toneIntensity = getToneIntensity();
@@ -155,13 +155,13 @@ const AnimatedSphere: React.FC<SphereVisualizerProps> = ({
     // Rotate the entire sphere based on tone
     if (isPlaying) {
       const rotationSpeed = toneIntensity * 0.5;
-      meshRef.current.rotation.y += rotationSpeed * 0.01;
-      meshRef.current.rotation.x += rotationSpeed * 0.005;
+      groupRef.current.rotation.y += rotationSpeed * 0.01;
+      groupRef.current.rotation.x += rotationSpeed * 0.005;
     }
   });
 
   return (
-    <group ref={meshRef}>
+    <group ref={groupRef}>
       <points ref={pointsRef}>
         <bufferGeometry>
           <bufferAttribute
