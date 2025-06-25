@@ -1,12 +1,12 @@
-
 import React, { useState, useRef, useCallback } from 'react';
 import { Upload, Play, Pause, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import FileUploader from '@/components/FileUploader';
-import DotMatrixVisualizer from '@/components/DotMatrixVisualizer';
+import SphereVisualizer from '@/components/SphereVisualizer';
 import AudioAnalyzer from '@/components/AudioAnalyzer';
+import CometBackground from '@/components/CometBackground';
 
 interface AnalysisData {
   toneSegments: Array<{
@@ -107,21 +107,23 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-black relative">
+      <CometBackground />
+      
+      <div className="container mx-auto px-4 py-8 relative z-10">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">
             Music Emotion Visualizer
           </h1>
           <p className="text-gray-400 text-lg">
-            Upload an MP3 file to see its emotional journey through interactive visualization
+            Upload an MP3 file to see its emotional journey through interactive 3D visualization
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Upload and Controls Section */}
           <div className="space-y-6">
-            <Card className="p-6 bg-gray-900 border-gray-700">
+            <Card className="p-6 bg-gray-900/80 backdrop-blur-sm border-gray-700">
               <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
                 <Upload className="w-5 h-5" />
                 Audio Upload
@@ -139,7 +141,7 @@ const Index = () => {
             </Card>
 
             {audioFile && (
-              <Card className="p-6 bg-gray-900 border-gray-700">
+              <Card className="p-6 bg-gray-900/80 backdrop-blur-sm border-gray-700">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <Volume2 className="w-5 h-5" />
                   Playback Controls
@@ -185,13 +187,16 @@ const Index = () => {
             )}
           </div>
 
-          {/* Visualization Section */}
+          {/* 3D Visualization Section */}
           <div>
-            <Card className="p-6 bg-gray-900 border-gray-700 h-fit">
+            <Card className="p-6 bg-gray-900/80 backdrop-blur-sm border-gray-700 h-fit">
               <h3 className="text-lg font-semibold text-white mb-4">
-                Dot Matrix Visualization
+                3D Sphere Visualization
               </h3>
-              <DotMatrixVisualizer
+              <p className="text-sm text-gray-400 mb-4">
+                Drag to rotate • Scroll to zoom • Interactive 3D visualization
+              </p>
+              <SphereVisualizer
                 currentTone={getCurrentTone()}
                 currentTime={currentTime}
                 beats={analysisData?.beats || []}
