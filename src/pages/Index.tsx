@@ -1,11 +1,10 @@
 
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, Play, Pause, Volume2, Music, Sparkles, SkipForward, SkipBack } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import FileUploader from '@/components/FileUploader';
+import { Music, Sparkles } from 'lucide-react';
 import DotMatrixVisualizer from '@/components/DotMatrixVisualizer';
-import AudioAnalyzer from '@/components/AudioAnalyzer';
+import PlaybackControls from '@/components/PlaybackControls';
+import UploadSection from '@/components/UploadSection';
+import AnalysisStats from '@/components/AnalysisStats';
 
 interface AnalysisData {
   toneSegments: Array<{
@@ -29,13 +28,12 @@ const Index = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const handleFileUpload = useCallback(async (file: File) => {
-    // Reset all state when new file is uploaded
+    // Reset state
     setAnalysisData(null);
     setCurrentTime(0);
     setDuration(0);
     setIsPlaying(false);
 
-    // Clear previous audio URL
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -45,7 +43,7 @@ const Index = () => {
     setAudioUrl(url);
     setIsAnalyzing(true);
 
-    // Generate analysis based on file name for demo
+    // Generate mock analysis
     setTimeout(() => {
       const isSadSong = file.name.toLowerCase().includes('sad');
       const isEnergeticSong = file.name.toLowerCase().includes('energetic') || file.name.toLowerCase().includes('dance');
@@ -54,79 +52,34 @@ const Index = () => {
       
       if (isSadSong) {
         mockAnalysis = {
-          toneSegments: [{
-            start: 0,
-            end: 25,
-            tone: 'sad',
-            confidence: 0.9
-          }, {
-            start: 25,
-            end: 50,
-            tone: 'melancholy',
-            confidence: 0.8
-          }, {
-            start: 50,
-            end: 75,
-            tone: 'sad',
-            confidence: 0.85
-          }, {
-            start: 75,
-            end: 100,
-            tone: 'neutral',
-            confidence: 0.6
-          }],
+          toneSegments: [
+            { start: 0, end: 25, tone: 'sad', confidence: 0.9 },
+            { start: 25, end: 50, tone: 'melancholy', confidence: 0.8 },
+            { start: 50, end: 75, tone: 'sad', confidence: 0.85 },
+            { start: 75, end: 100, tone: 'neutral', confidence: 0.6 }
+          ],
           beats: Array.from({ length: 150 }, (_, i) => i * 0.67),
           duration: 120
         };
       } else if (isEnergeticSong) {
         mockAnalysis = {
-          toneSegments: [{
-            start: 0,
-            end: 20,
-            tone: 'energetic',
-            confidence: 0.95
-          }, {
-            start: 20,
-            end: 40,
-            tone: 'happy',
-            confidence: 0.8
-          }, {
-            start: 40,
-            end: 70,
-            tone: 'energetic',
-            confidence: 0.9
-          }, {
-            start: 70,
-            end: 120,
-            tone: 'happy',
-            confidence: 0.85
-          }],
+          toneSegments: [
+            { start: 0, end: 20, tone: 'energetic', confidence: 0.95 },
+            { start: 20, end: 40, tone: 'happy', confidence: 0.8 },
+            { start: 40, end: 70, tone: 'energetic', confidence: 0.9 },
+            { start: 70, end: 120, tone: 'happy', confidence: 0.85 }
+          ],
           beats: Array.from({ length: 300 }, (_, i) => i * 0.4),
           duration: 120
         };
       } else {
         mockAnalysis = {
-          toneSegments: [{
-            start: 0,
-            end: 30,
-            tone: 'happy',
-            confidence: 0.8
-          }, {
-            start: 30,
-            end: 60,
-            tone: 'energetic',
-            confidence: 0.9
-          }, {
-            start: 60,
-            end: 90,
-            tone: 'calm',
-            confidence: 0.75
-          }, {
-            start: 90,
-            end: 120,
-            tone: 'happy',
-            confidence: 0.7
-          }],
+          toneSegments: [
+            { start: 0, end: 30, tone: 'happy', confidence: 0.8 },
+            { start: 30, end: 60, tone: 'energetic', confidence: 0.9 },
+            { start: 60, end: 90, tone: 'calm', confidence: 0.75 },
+            { start: 90, end: 120, tone: 'happy', confidence: 0.7 }
+          ],
           beats: Array.from({ length: 240 }, (_, i) => i * 0.5),
           duration: 120
         };
@@ -145,18 +98,6 @@ const Index = () => {
         audioRef.current.play();
       }
       setIsPlaying(!isPlaying);
-    }
-  };
-
-  const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
-    }
-  };
-
-  const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration);
     }
   };
 
@@ -189,156 +130,74 @@ const Index = () => {
     return segment?.tone || 'neutral';
   };
 
-  const getProgress = () => {
-    return duration > 0 ? (currentTime / duration) * 100 : 0;
-  };
-
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Music className="w-6 h-6 text-white" />
+            <Music className="w-5 h-5 text-white" />
             <Sparkles className="w-4 h-4 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Music Visualizer
-          </h1>
-          <p className="text-gray-400 text-sm">
-            Experience your music through dot matrix visualization
-          </p>
+          <h1 className="text-2xl font-bold text-white mb-1">Music Visualizer</h1>
+          <p className="text-gray-400 text-sm">Dot matrix visualization of rhythm and emotion</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
           
           {/* Left Column - Controls */}
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4 w-full lg:w-auto">
+            <UploadSection onFileUpload={handleFileUpload} isAnalyzing={isAnalyzing} />
             
-            {/* Upload Section */}
-            <div className="p-4 bg-gray-900 border border-gray-700 rounded-lg">
-              <div className="flex items-center gap-2 mb-3">
-                <Upload className="w-4 h-4 text-white" />
-                <h3 className="text-sm font-medium text-white">Upload Track</h3>
-              </div>
-              <FileUploader onFileUpload={handleFileUpload} />
-              
-              {isAnalyzing && (
-                <div className="mt-3 p-3 bg-gray-800 rounded border border-gray-600">
-                  <div className="flex items-center gap-2 text-white text-sm">
-                    <div className="animate-spin rounded-full h-3 w-3 border border-white border-t-transparent"></div>
-                    <span>Analyzing audio...</span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Playback Controls */}
             {audioFile && (
-              <div className="p-4 bg-gray-900 border border-gray-700 rounded-lg">
-                <div className="flex items-center gap-2 mb-3">
-                  <Volume2 className="w-4 h-4 text-white" />
-                  <h3 className="text-sm font-medium text-white">Playback</h3>
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 justify-center">
-                    <Button
-                      onClick={skipBackward}
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 w-8 p-0 text-white hover:bg-gray-800"
-                    >
-                      <SkipBack className="w-4 h-4" />
-                    </Button>
-                    
-                    <Button
-                      onClick={togglePlayPause}
-                      size="sm"
-                      className="h-10 w-10 rounded-full bg-white text-black hover:bg-gray-200 p-0"
-                    >
-                      {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-                    </Button>
-                    
-                    <Button
-                      onClick={skipForward}
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 w-8 p-0 text-white hover:bg-gray-800"
-                    >
-                      <SkipForward className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm text-gray-300">Emotion:</span>
-                      <span className="text-sm font-bold capitalize text-white">
-                        {getCurrentTone()}
-                      </span>
-                      <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                    </div>
-                    
-                    <div className="relative cursor-pointer" onClick={handleProgressClick}>
-                      <Progress value={getProgress()} className="h-2 bg-gray-700 border-none" />
-                    </div>
-                    
-                    <div className="flex justify-between text-xs text-gray-400 mt-1">
-                      <span>{Math.floor(currentTime / 60)}:{(Math.floor(currentTime) % 60).toString().padStart(2, '0')}</span>
-                      <span>{Math.floor(duration / 60)}:{(Math.floor(duration) % 60).toString().padStart(2, '0')}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <audio
-                  ref={audioRef}
-                  src={audioUrl}
-                  onTimeUpdate={handleTimeUpdate}
-                  onLoadedMetadata={handleLoadedMetadata}
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
-                />
-              </div>
+              <PlaybackControls
+                isPlaying={isPlaying}
+                currentTime={currentTime}
+                duration={duration}
+                currentTone={getCurrentTone()}
+                onTogglePlayPause={togglePlayPause}
+                onSkipForward={skipForward}
+                onSkipBackward={skipBackward}
+                onProgressClick={handleProgressClick}
+              />
             )}
 
-            {/* Analysis Display */}
-            {analysisData && (
-              <div className="p-4 bg-gray-900 border border-gray-700 rounded-lg">
-                <h3 className="text-sm font-medium text-white mb-3">Analysis</h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="text-center p-3 bg-gray-800 rounded">
-                    <div className="text-lg font-bold text-white">{analysisData.beats.length}</div>
-                    <div className="text-gray-400">Beats</div>
-                  </div>
-                  <div className="text-center p-3 bg-gray-800 rounded">
-                    <div className="text-lg font-bold text-white">{Math.round(analysisData.beats.length / analysisData.duration * 60)}</div>
-                    <div className="text-gray-400">BPM</div>
-                  </div>
-                </div>
-              </div>
-            )}
+            {analysisData && <AnalysisStats analysisData={analysisData} />}
           </div>
 
-          {/* Right Column - Dot Matrix Visualization */}
-          <div className="lg:col-span-2">
-            <div className="p-4 bg-gray-900 border border-gray-700 rounded-lg h-full">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-white">Dot Matrix Visualization</h3>
-                <p className="text-sm text-gray-400">
-                  {analysisData ? 'Visual representation of your music\'s rhythm and emotion' : 'Upload a track to begin visualization'}
-                </p>
-              </div>
-              <div className="flex items-center justify-center h-96">
-                <DotMatrixVisualizer
-                  currentTone={getCurrentTone()}
-                  currentTime={currentTime}
-                  beats={analysisData?.beats || []}
-                  isPlaying={isPlaying}
-                />
-              </div>
+          {/* Center - Dot Matrix Visualization */}
+          <div className="bg-gray-900/30 backdrop-blur-sm border border-gray-700/50 rounded-lg p-6">
+            <div className="mb-4 text-center">
+              <h3 className="text-lg font-semibold text-white">Dot Matrix Visualization</h3>
+              <p className="text-sm text-gray-400">
+                {analysisData ? 'Visual representation of rhythm and emotion' : 'Upload a track to begin'}
+              </p>
             </div>
+            <DotMatrixVisualizer
+              currentTone={getCurrentTone()}
+              currentTime={currentTime}
+              beats={analysisData?.beats || []}
+              isPlaying={isPlaying}
+            />
           </div>
         </div>
+
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          onTimeUpdate={() => {
+            if (audioRef.current) {
+              setCurrentTime(audioRef.current.currentTime);
+            }
+          }}
+          onLoadedMetadata={() => {
+            if (audioRef.current) {
+              setDuration(audioRef.current.duration);
+            }
+          }}
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+        />
       </div>
     </div>
   );
