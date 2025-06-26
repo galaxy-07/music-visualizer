@@ -1,8 +1,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, Play, Pause, Volume2, Music, Sparkles } from 'lucide-react';
+import { Upload, Play, Pause, Volume2, Music, Sparkles, SkipForward, SkipBack } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import FileUploader from '@/components/FileUploader';
 import SphereVisualizer from '@/components/SphereVisualizer';
@@ -118,6 +117,27 @@ const Index = () => {
     }
   };
 
+  const skipForward = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = Math.min(audioRef.current.currentTime + 10, duration);
+    }
+  };
+
+  const skipBackward = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = Math.max(audioRef.current.currentTime - 10, 0);
+    }
+  };
+
+  const handleProgressClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (audioRef.current && duration > 0) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const newTime = (clickX / rect.width) * duration;
+      audioRef.current.currentTime = newTime;
+    }
+  };
+
   const getCurrentTone = () => {
     if (!analysisData) return 'neutral';
     const segment = analysisData.toneSegments.find(
@@ -148,90 +168,102 @@ const Index = () => {
       <CometBackground />
       
       {/* Glassmorphism overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/20 via-transparent to-black/20 backdrop-blur-[1px]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-transparent to-black/30 backdrop-blur-[1px]" />
       
-      <div className="container mx-auto px-4 py-8 relative z-10">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="relative">
-              <Music className="w-12 h-12 text-white" />
-              <Sparkles className="w-6 h-6 text-yellow-400 absolute -top-1 -right-1 animate-pulse" />
-            </div>
+      <div className="container mx-auto px-6 py-6 relative z-10 max-w-7xl">
+        {/* Compact Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <Music className="w-8 h-8 text-white" />
+            <Sparkles className="w-5 h-5 text-yellow-400 animate-pulse" />
           </div>
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent mb-2">
             Music Emotion Visualizer
           </h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            Experience your music like never before. Upload any track and watch emotions come alive through stunning 3D visualization
+          <p className="text-sm text-gray-400 max-w-xl mx-auto">
+            Experience your music through stunning 3D visualization and emotional analysis
           </p>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          {/* Left Panel */}
-          <div className="space-y-6">
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
+          {/* Left Panel - Upload & Controls */}
+          <div className="lg:col-span-1 space-y-4">
             {/* Upload Section */}
-            <Card className="p-8 bg-white/5 backdrop-blur-lg border border-white/10 shadow-2xl rounded-2xl">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg">
-                  <Upload className="w-6 h-6 text-white" />
-                </div>
-                <h2 className="text-2xl font-semibold text-white">Upload Your Track</h2>
+            <div className="p-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-lg">
+              <div className="flex items-center gap-2 mb-3">
+                <Upload className="w-4 h-4 text-blue-400" />
+                <h3 className="text-sm font-medium text-white">Upload Track</h3>
               </div>
               <FileUploader onFileUpload={handleFileUpload} />
               
               {isAnalyzing && (
-                <div className="mt-6 p-4 bg-gradient-to-r from-blue-500/20 to-purple-600/20 rounded-xl border border-blue-500/30">
-                  <div className="flex items-center gap-3 text-white">
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                    <span className="text-lg">Analyzing emotional patterns...</span>
-                  </div>
-                  <div className="mt-2 text-sm text-blue-200">
-                    Extracting beats, tones, and musical emotions
+                <div className="mt-3 p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
+                  <div className="flex items-center gap-2 text-white text-sm">
+                    <div className="animate-spin rounded-full h-3 w-3 border border-white border-t-transparent"></div>
+                    <span>Analyzing emotions...</span>
                   </div>
                 </div>
               )}
-            </Card>
+            </div>
 
             {/* Playback Controls */}
             {audioFile && (
-              <Card className="p-8 bg-white/5 backdrop-blur-lg border border-white/10 shadow-2xl rounded-2xl">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg">
-                    <Volume2 className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-semibold text-white">Playback</h3>
+              <div className="p-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <Volume2 className="w-4 h-4 text-green-400" />
+                  <h3 className="text-sm font-medium text-white">Playback</h3>
                 </div>
                 
-                <div className="space-y-6">
-                  <div className="flex items-center gap-6">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
                     <Button
-                      onClick={togglePlayPause}
-                      size="lg"
-                      className="h-16 w-16 rounded-full bg-gradient-to-r from-white to-gray-200 text-black hover:from-gray-100 hover:to-gray-300 shadow-lg transition-all duration-200 hover:scale-105"
+                      onClick={skipBackward}
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 w-8 p-0 text-white hover:bg-white/20"
                     >
-                      {isPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8 ml-1" />}
+                      <SkipBack className="w-4 h-4" />
                     </Button>
                     
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className="text-sm text-gray-300">Current Emotion:</span>
-                        <span className={`text-lg font-bold capitalize ${getToneColor(getCurrentTone())}`}>
-                          {getCurrentTone()}
-                        </span>
-                        <div className={`w-3 h-3 rounded-full ${getCurrentTone() === 'happy' ? 'bg-yellow-400' : getCurrentTone() === 'sad' ? 'bg-blue-400' : getCurrentTone() === 'energetic' ? 'bg-orange-400' : getCurrentTone() === 'calm' ? 'bg-teal-400' : getCurrentTone() === 'angry' ? 'bg-red-400' : getCurrentTone() === 'melancholy' ? 'bg-purple-400' : 'bg-gray-400'} animate-pulse`} />
-                      </div>
-                      <div className="relative">
-                        <Progress 
-                          value={getProgress()} 
-                          className="h-3 bg-gray-700/50 border border-white/10 rounded-full overflow-hidden"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-600/20 rounded-full" />
-                      </div>
-                      <div className="flex justify-between text-sm text-gray-400 mt-2">
-                        <span>{Math.floor(currentTime / 60)}:{(Math.floor(currentTime) % 60).toString().padStart(2, '0')}</span>
-                        <span>{Math.floor(duration / 60)}:{(Math.floor(duration) % 60).toString().padStart(2, '0')}</span>
-                      </div>
+                    <Button
+                      onClick={togglePlayPause}
+                      size="sm"
+                      className="h-10 w-10 rounded-full bg-white text-black hover:bg-gray-200 p-0"
+                    >
+                      {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+                    </Button>
+                    
+                    <Button
+                      onClick={skipForward}
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 w-8 p-0 text-white hover:bg-white/20"
+                    >
+                      <SkipForward className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs text-gray-300">Emotion:</span>
+                      <span className={`text-xs font-bold capitalize ${getToneColor(getCurrentTone())}`}>
+                        {getCurrentTone()}
+                      </span>
+                      <div className={`w-2 h-2 rounded-full ${getCurrentTone() === 'happy' ? 'bg-yellow-400' : getCurrentTone() === 'sad' ? 'bg-blue-400' : getCurrentTone() === 'energetic' ? 'bg-orange-400' : getCurrentTone() === 'calm' ? 'bg-teal-400' : getCurrentTone() === 'angry' ? 'bg-red-400' : getCurrentTone() === 'melancholy' ? 'bg-purple-400' : 'bg-gray-400'} animate-pulse`} />
+                    </div>
+                    <div 
+                      className="relative cursor-pointer"
+                      onClick={handleProgressClick}
+                    >
+                      <Progress 
+                        value={getProgress()} 
+                        className="h-2 bg-gray-700/50 border border-white/10 rounded-full"
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-400 mt-1">
+                      <span>{Math.floor(currentTime / 60)}:{(Math.floor(currentTime) % 60).toString().padStart(2, '0')}</span>
+                      <span>{Math.floor(duration / 60)}:{(Math.floor(duration) % 60).toString().padStart(2, '0')}</span>
                     </div>
                   </div>
                 </div>
@@ -244,31 +276,45 @@ const Index = () => {
                   onPlay={() => setIsPlaying(true)}
                   onPause={() => setIsPlaying(false)}
                 />
-              </Card>
+              </div>
             )}
 
-            {/* Analysis Section */}
+            {/* Compact Analysis */}
             {analysisData && (
-              <AudioAnalyzer data={analysisData} currentTime={currentTime} />
+              <div className="p-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-lg">
+                <h3 className="text-sm font-medium text-white mb-3">Analysis</h3>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-white">{analysisData.beats.length}</div>
+                    <div className="text-gray-400">Beats</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-white">{Math.round((analysisData.beats.length / analysisData.duration) * 60)}</div>
+                    <div className="text-gray-400">BPM</div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
 
-          {/* 3D Visualization */}
-          <div>
-            <Card className="p-8 bg-white/5 backdrop-blur-lg border border-white/10 shadow-2xl rounded-2xl">
-              <div className="mb-6">
-                <h3 className="text-2xl font-semibold text-white mb-2">Emotional Universe</h3>
-                <p className="text-gray-300">
-                  Watch emotions dance in 3D space • Drag to orbit • Scroll to zoom • Use controls for precision
+          {/* Center & Right - 3D Visualization */}
+          <div className="lg:col-span-2">
+            <div className="h-full p-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-lg">
+              <div className="mb-3">
+                <h3 className="text-lg font-semibold text-white">Emotional Universe</h3>
+                <p className="text-xs text-gray-400">
+                  Interactive 3D visualization • Drag to orbit • Scroll to zoom
                 </p>
               </div>
-              <SphereVisualizer
-                currentTone={getCurrentTone()}
-                currentTime={currentTime}
-                beats={analysisData?.beats || []}
-                isPlaying={isPlaying}
-              />
-            </Card>
+              <div className="h-[calc(100%-60px)]">
+                <SphereVisualizer
+                  currentTone={getCurrentTone()}
+                  currentTime={currentTime}
+                  beats={analysisData?.beats || []}
+                  isPlaying={isPlaying}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

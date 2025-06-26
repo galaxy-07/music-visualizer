@@ -33,7 +33,7 @@ const AnimatedSphere: React.FC<SphereVisualizerProps & { controlsRef: React.RefO
       camera.position.set(0, 0, 6);
       camera.lookAt(0, 0, 0);
     }
-  }, [beats.length, camera]); // Reset when new song is uploaded (beats array changes)
+  }, [beats.length, camera]);
 
   const getCurrentBeatIntensity = useCallback(() => {
     if (!beats.length || !isPlaying) return 0;
@@ -58,26 +58,26 @@ const AnimatedSphere: React.FC<SphereVisualizerProps & { controlsRef: React.RefO
 
   const getToneColor = useCallback((tone: string) => {
     const colorMap: { [key: string]: [number, number, number] } = {
-      happy: [1.0, 0.8, 0.2], // Golden yellow
-      energetic: [1.0, 0.3, 0.1], // Bright orange
-      sad: [0.2, 0.4, 0.8], // Blue
-      melancholy: [0.4, 0.2, 0.6], // Purple
-      calm: [0.2, 0.8, 0.6], // Teal
-      angry: [0.9, 0.1, 0.1], // Red
-      neutral: [0.7, 0.7, 0.7], // Gray
+      happy: [1.0, 0.8, 0.2],
+      energetic: [1.0, 0.3, 0.1],
+      sad: [0.2, 0.4, 0.8],
+      melancholy: [0.4, 0.2, 0.6],
+      calm: [0.2, 0.8, 0.6],
+      angry: [0.9, 0.1, 0.1],
+      neutral: [0.7, 0.7, 0.7],
     };
     return colorMap[tone] || [0.5, 0.5, 0.5];
   }, []);
 
   const { positions, colors } = useMemo(() => {
-    const pointCount = 3000;
+    const pointCount = 2000; // Reduced for better performance
     const positions = new Float32Array(pointCount * 3);
     const colors = new Float32Array(pointCount * 3);
 
     for (let i = 0; i < pointCount; i++) {
       const theta = Math.acos(1 - 2 * (i / pointCount));
       const phi = Math.PI * (1 + Math.sqrt(5)) * i;
-      const radius = 2 + Math.random() * 0.8;
+      const radius = 2 + Math.random() * 0.6;
       
       positions[i * 3] = radius * Math.sin(theta) * Math.cos(phi);
       positions[i * 3 + 1] = radius * Math.sin(theta) * Math.sin(phi);
@@ -166,7 +166,7 @@ const AnimatedSphere: React.FC<SphereVisualizerProps & { controlsRef: React.RefO
     pointsRef.current.geometry.attributes.position.needsUpdate = true;
 
     if (isPlaying) {
-      const rotationSpeed = beatIntensity > 0 ? 0.02 : 0.005;
+      const rotationSpeed = beatIntensity > 0 ? 0.01 : 0.003;
       groupRef.current.rotation.y += rotationSpeed;
       groupRef.current.rotation.x += rotationSpeed * 0.3;
     }
@@ -190,10 +190,10 @@ const AnimatedSphere: React.FC<SphereVisualizerProps & { controlsRef: React.RefO
           />
         </bufferGeometry>
         <pointsMaterial
-          size={0.04}
+          size={0.05}
           vertexColors
           transparent
-          opacity={0.9}
+          opacity={0.8}
           sizeAttenuation
         />
       </points>
@@ -239,11 +239,15 @@ const SphereVisualizer: React.FC<SphereVisualizerProps> = (props) => {
   }, []);
 
   return (
-    <div className="relative w-full h-96 rounded-2xl bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden border border-white/10 shadow-2xl">
-      <Canvas camera={{ position: [0, 0, 6], fov: 75 }}>
-        <ambientLight intensity={0.3} />
-        <pointLight position={[10, 10, 10]} intensity={0.8} color="#ffffff" />
-        <pointLight position={[-10, -10, -10]} intensity={0.4} color="#4f46e5" />
+    <div className="relative w-full h-full rounded-xl bg-gradient-to-br from-black/50 via-gray-900/50 to-black/50 overflow-hidden border border-white/10">
+      <Canvas 
+        camera={{ position: [0, 0, 6], fov: 75 }}
+        gl={{ alpha: true, antialias: true }}
+        style={{ background: 'transparent' }}
+      >
+        <ambientLight intensity={0.4} />
+        <pointLight position={[10, 10, 10]} intensity={0.6} color="#ffffff" />
+        <pointLight position={[-10, -10, -10]} intensity={0.3} color="#4f46e5" />
         <AnimatedSphere {...props} controlsRef={controlsRef} />
         <OrbitControls
           ref={controlsRef}
@@ -254,6 +258,9 @@ const SphereVisualizer: React.FC<SphereVisualizerProps> = (props) => {
           maxDistance={12}
           dampingFactor={0.05}
           enableDamping={true}
+          rotateSpeed={0.5}
+          zoomSpeed={0.8}
+          panSpeed={0.8}
         />
       </Canvas>
       <SphereControls
