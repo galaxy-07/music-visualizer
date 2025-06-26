@@ -4,9 +4,8 @@ import { Upload, Play, Pause, Volume2, Music, Sparkles, SkipForward, SkipBack } 
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import FileUploader from '@/components/FileUploader';
-import CosmicVisualizer from '@/components/CosmicVisualizer';
+import DotMatrixVisualizer from '@/components/DotMatrixVisualizer';
 import AudioAnalyzer from '@/components/AudioAnalyzer';
-import CometBackground from '@/components/CometBackground';
 
 interface AnalysisData {
   toneSegments: Array<{
@@ -194,65 +193,41 @@ const Index = () => {
     return duration > 0 ? (currentTime / duration) * 100 : 0;
   };
 
-  const getToneColor = (tone: string) => {
-    const colorMap: { [key: string]: string } = {
-      happy: 'text-yellow-400',
-      energetic: 'text-orange-400',
-      sad: 'text-blue-400',
-      melancholy: 'text-purple-400',
-      calm: 'text-teal-400',
-      angry: 'text-red-400',
-      neutral: 'text-gray-400'
-    };
-    return colorMap[tone] || 'text-gray-400';
-  };
-
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Cosmic gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-black" />
-      <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/20 via-transparent to-pink-900/20" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent" />
-      
-      <CometBackground />
-      
-      {/* Glassmorphism overlay */}
-      <div className="absolute inset-0 backdrop-blur-[0.5px]" />
-      
-      <div className="container mx-auto px-4 py-4 relative z-10 max-w-6xl">
-        {/* Compact Header */}
-        <div className="text-center mb-6">
+    <div className="min-h-screen bg-black text-white">
+      <div className="container mx-auto px-4 py-6 max-w-4xl">
+        {/* Header */}
+        <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Music className="w-6 h-6 text-white" />
-            <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
+            <Sparkles className="w-4 h-4 text-white" />
           </div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent mb-1">
-            Cosmic Music Visualizer
+          <h1 className="text-3xl font-bold text-white mb-2">
+            Music Visualizer
           </h1>
-          <p className="text-xs text-gray-400 max-w-md mx-auto">
-            Experience your music through cosmic visualization and emotional analysis
+          <p className="text-gray-400 text-sm">
+            Experience your music through dot matrix visualization
           </p>
         </div>
 
-        {/* Main Content - Single Row Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-180px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Left Panel - Controls */}
-          <div className="lg:col-span-4 xl:col-span-3 space-y-3">
+          {/* Left Column - Controls */}
+          <div className="space-y-4">
             
             {/* Upload Section */}
-            <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl shadow-purple-500/10">
-              <div className="flex items-center gap-2 mb-2">
-                <Upload className="w-3 h-3 text-blue-400" />
-                <h3 className="text-xs font-medium text-white">Upload Track</h3>
+            <div className="p-4 bg-gray-900 border border-gray-700 rounded-lg">
+              <div className="flex items-center gap-2 mb-3">
+                <Upload className="w-4 h-4 text-white" />
+                <h3 className="text-sm font-medium text-white">Upload Track</h3>
               </div>
               <FileUploader onFileUpload={handleFileUpload} />
               
               {isAnalyzing && (
-                <div className="mt-2 p-2 bg-blue-500/10 rounded border border-blue-500/20">
-                  <div className="flex items-center gap-2 text-white text-xs">
-                    <div className="animate-spin rounded-full h-2 w-2 border border-white border-t-transparent"></div>
-                    <span>Analyzing...</span>
+                <div className="mt-3 p-3 bg-gray-800 rounded border border-gray-600">
+                  <div className="flex items-center gap-2 text-white text-sm">
+                    <div className="animate-spin rounded-full h-3 w-3 border border-white border-t-transparent"></div>
+                    <span>Analyzing audio...</span>
                   </div>
                 </div>
               )}
@@ -260,59 +235,52 @@ const Index = () => {
 
             {/* Playback Controls */}
             {audioFile && (
-              <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl shadow-green-500/10">
-                <div className="flex items-center gap-2 mb-2">
-                  <Volume2 className="w-3 h-3 text-green-400" />
-                  <h3 className="text-xs font-medium text-white">Playback</h3>
+              <div className="p-4 bg-gray-900 border border-gray-700 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <Volume2 className="w-4 h-4 text-white" />
+                  <h3 className="text-sm font-medium text-white">Playback</h3>
                 </div>
                 
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 justify-center">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 justify-center">
                     <Button
                       onClick={skipBackward}
                       size="sm"
                       variant="ghost"
-                      className="h-6 w-6 p-0 text-white hover:bg-white/10"
+                      className="h-8 w-8 p-0 text-white hover:bg-gray-800"
                     >
-                      <SkipBack className="w-3 h-3" />
+                      <SkipBack className="w-4 h-4" />
                     </Button>
                     
                     <Button
                       onClick={togglePlayPause}
                       size="sm"
-                      className="h-8 w-8 rounded-full bg-white text-black hover:bg-gray-200 p-0"
+                      className="h-10 w-10 rounded-full bg-white text-black hover:bg-gray-200 p-0"
                     >
-                      {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+                      {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
                     </Button>
                     
                     <Button
                       onClick={skipForward}
                       size="sm"
                       variant="ghost"
-                      className="h-6 w-6 p-0 text-white hover:bg-white/10"
+                      className="h-8 w-8 p-0 text-white hover:bg-gray-800"
                     >
-                      <SkipForward className="w-3 h-3" />
+                      <SkipForward className="w-4 h-4" />
                     </Button>
                   </div>
                   
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs text-gray-300">Emotion:</span>
-                      <span className={`text-xs font-bold capitalize ${getToneColor(getCurrentTone())}`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm text-gray-300">Emotion:</span>
+                      <span className="text-sm font-bold capitalize text-white">
                         {getCurrentTone()}
                       </span>
-                      <div className={`w-1.5 h-1.5 rounded-full ${
-                        getCurrentTone() === 'happy' ? 'bg-yellow-400' :
-                        getCurrentTone() === 'sad' ? 'bg-blue-400' :
-                        getCurrentTone() === 'energetic' ? 'bg-orange-400' :
-                        getCurrentTone() === 'calm' ? 'bg-teal-400' :
-                        getCurrentTone() === 'angry' ? 'bg-red-400' :
-                        getCurrentTone() === 'melancholy' ? 'bg-purple-400' : 'bg-gray-400'
-                      } animate-pulse`} />
+                      <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
                     </div>
                     
                     <div className="relative cursor-pointer" onClick={handleProgressClick}>
-                      <Progress value={getProgress()} className="h-1.5 bg-gray-700/50 border border-white/5 rounded-full" />
+                      <Progress value={getProgress()} className="h-2 bg-gray-700 border-none" />
                     </div>
                     
                     <div className="flex justify-between text-xs text-gray-400 mt-1">
@@ -335,15 +303,15 @@ const Index = () => {
 
             {/* Analysis Display */}
             {analysisData && (
-              <div className="p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl shadow-indigo-500/10">
-                <h3 className="text-xs font-medium text-white mb-2">Analysis</h3>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="text-center p-2 bg-white/5 rounded">
-                    <div className="text-sm font-bold text-white">{analysisData.beats.length}</div>
+              <div className="p-4 bg-gray-900 border border-gray-700 rounded-lg">
+                <h3 className="text-sm font-medium text-white mb-3">Analysis</h3>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="text-center p-3 bg-gray-800 rounded">
+                    <div className="text-lg font-bold text-white">{analysisData.beats.length}</div>
                     <div className="text-gray-400">Beats</div>
                   </div>
-                  <div className="text-center p-2 bg-white/5 rounded">
-                    <div className="text-sm font-bold text-white">{Math.round(analysisData.beats.length / analysisData.duration * 60)}</div>
+                  <div className="text-center p-3 bg-gray-800 rounded">
+                    <div className="text-lg font-bold text-white">{Math.round(analysisData.beats.length / analysisData.duration * 60)}</div>
                     <div className="text-gray-400">BPM</div>
                   </div>
                 </div>
@@ -351,17 +319,17 @@ const Index = () => {
             )}
           </div>
 
-          {/* Right Panel - Cosmic Visualization */}
-          <div className="lg:col-span-8 xl:col-span-9">
-            <div className="h-full p-4 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg shadow-2xl shadow-purple-500/10">
-              <div className="mb-3">
-                <h3 className="text-sm font-semibold text-white">Cosmic Visualization</h3>
-                <p className="text-xs text-gray-400">
-                  {analysisData ? 'Visual representation of your music\'s emotional journey' : 'Upload a track to begin visualization'}
+          {/* Right Column - Dot Matrix Visualization */}
+          <div className="lg:col-span-2">
+            <div className="p-4 bg-gray-900 border border-gray-700 rounded-lg h-full">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-white">Dot Matrix Visualization</h3>
+                <p className="text-sm text-gray-400">
+                  {analysisData ? 'Visual representation of your music\'s rhythm and emotion' : 'Upload a track to begin visualization'}
                 </p>
               </div>
-              <div className="h-[calc(100%-50px)]">
-                <CosmicVisualizer
+              <div className="flex items-center justify-center h-96">
+                <DotMatrixVisualizer
                   currentTone={getCurrentTone()}
                   currentTime={currentTime}
                   beats={analysisData?.beats || []}
