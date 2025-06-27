@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useCallback } from 'react';
 import { Music, Sparkles } from 'lucide-react';
 import DotMatrixVisualizer from '@/components/DotMatrixVisualizer';
@@ -226,7 +227,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white font-sans">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
         <div className="text-center mb-6">
@@ -234,8 +235,7 @@ const Index = () => {
             <Music className="w-5 h-5 text-white" />
             <Sparkles className="w-4 h-4 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-1">Music Visualizer</h1>
-          <p className="text-gray-400 text-sm">Dot matrix visualization of rhythm and emotion</p>
+          <h1 className="text-3xl font-display font-bold text-white mb-1 tracking-tight">Music Visualizer</h1>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
@@ -263,7 +263,7 @@ const Index = () => {
           {/* Center - Dot Matrix Visualization */}
           <div className="bg-gray-900/30 backdrop-blur-sm border border-gray-700/50 rounded-lg p-6">
             <div className="mb-4 text-center">
-              <h3 className="text-lg font-semibold text-white">Dot Matrix Visualization</h3>
+              <h3 className="text-xl font-display font-semibold text-white tracking-tight">Dot Matrix Visualization</h3>
             </div>
             <DotMatrixVisualizer
               currentTone={getCurrentTone()}

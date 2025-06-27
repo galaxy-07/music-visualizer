@@ -39,7 +39,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-700/50 rounded-lg p-4 w-full max-w-sm">
       <div className="flex items-center gap-2 mb-3">
         <Volume2 className="w-4 h-4 text-white" />
-        <h3 className="text-sm font-medium text-white">Playback</h3>
+        <h3 className="text-sm font-display font-medium text-white">Playback</h3>
       </div>
       
       <div className="space-y-3">
@@ -73,8 +73,8 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm text-gray-300">Emotion:</span>
-            <span className="text-sm font-bold capitalize text-white">
+            <span className="text-sm font-medium text-gray-300">Emotion:</span>
+            <span className="text-sm font-display font-bold capitalize text-white">
               {currentTone}
             </span>
             <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
@@ -84,7 +84,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             <Progress value={getProgress()} className="h-2 bg-gray-700 border-none" />
           </div>
           
-          <div className="flex justify-between text-xs text-gray-400 mt-1">
+          <div className="flex justify-between text-xs font-mono text-gray-400 mt-1">
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
