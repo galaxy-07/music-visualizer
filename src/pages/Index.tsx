@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback } from 'react';
 import { Music, Sparkles } from 'lucide-react';
 import DotMatrixVisualizer from '@/components/DotMatrixVisualizer';
@@ -28,10 +27,8 @@ const Index = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const generateAdvancedAnalysis = (fileName: string, audioDuration: number): AnalysisData => {
-    // Enhanced emotion detection based on filename patterns
     const name = fileName.toLowerCase();
     
-    // Define emotion keywords for better detection
     const emotionKeywords = {
       sad: ['sad', 'melancholy', 'blue', 'cry', 'tear', 'lonely', 'empty', 'broken', 'hurt'],
       happy: ['happy', 'joy', 'celebration', 'party', 'smile', 'bright', 'sunshine', 'fun'],
@@ -41,7 +38,6 @@ const Index = () => {
       melancholy: ['nostalgic', 'wistful', 'memory', 'past', 'longing', 'sorrow']
     };
 
-    // Detect primary emotion
     let primaryEmotion = 'neutral';
     let maxMatches = 0;
     
@@ -53,35 +49,34 @@ const Index = () => {
       }
     }
 
-    // Generate realistic beat patterns based on emotion
     const generateBeats = (emotion: string, duration: number) => {
       let bpm: number;
       let pattern: 'regular' | 'syncopated' | 'slow' | 'irregular' = 'regular';
       
       switch (emotion) {
         case 'energetic':
-          bpm = 128 + Math.random() * 20; // 128-148 BPM
+          bpm = 128 + Math.random() * 20;
           pattern = 'syncopated';
           break;
         case 'happy':
-          bpm = 110 + Math.random() * 20; // 110-130 BPM
+          bpm = 110 + Math.random() * 20;
           pattern = 'regular';
           break;
         case 'sad':
         case 'melancholy':
-          bpm = 60 + Math.random() * 20; // 60-80 BPM
+          bpm = 60 + Math.random() * 20;
           pattern = 'slow';
           break;
         case 'angry':
-          bpm = 140 + Math.random() * 20; // 140-160 BPM
+          bpm = 140 + Math.random() * 20;
           pattern = 'irregular';
           break;
         case 'calm':
-          bpm = 70 + Math.random() * 15; // 70-85 BPM
+          bpm = 70 + Math.random() * 15;
           pattern = 'slow';
           break;
         default:
-          bpm = 100 + Math.random() * 20; // 100-120 BPM
+          bpm = 100 + Math.random() * 20;
           pattern = 'regular';
       }
 
@@ -89,16 +84,13 @@ const Index = () => {
       const beats = [];
       
       for (let time = 0; time < duration; time += beatInterval) {
-        // Add slight variation for realism
         const variation = (Math.random() - 0.5) * 0.1;
         beats.push(time + variation);
         
-        // Add syncopation for energetic tracks
         if (pattern === 'syncopated' && Math.random() > 0.7) {
           beats.push(time + beatInterval * 0.5 + variation);
         }
         
-        // Add irregular beats for angry tracks
         if (pattern === 'irregular' && Math.random() > 0.8) {
           beats.push(time + beatInterval * 0.25 + variation);
         }
@@ -107,10 +99,9 @@ const Index = () => {
       return beats.sort((a, b) => a - b);
     };
 
-    // Generate emotion segments with more realistic transitions
     const generateToneSegments = (primaryEmotion: string, duration: number) => {
       const segments = [];
-      const numSegments = Math.floor(duration / 20) + 2; // ~20 second segments
+      const numSegments = Math.floor(duration / 20) + 2;
       
       for (let i = 0; i < numSegments; i++) {
         const start = (i / numSegments) * duration;
@@ -119,7 +110,6 @@ const Index = () => {
         let tone = primaryEmotion;
         let confidence = 0.8 + Math.random() * 0.2;
         
-        // Add emotional variations in middle sections
         if (i > 0 && i < numSegments - 1 && Math.random() > 0.6) {
           const variations = {
             sad: ['melancholy', 'neutral'],
@@ -132,7 +122,7 @@ const Index = () => {
           
           const possibleVariations = variations[primaryEmotion as keyof typeof variations] || ['neutral'];
           tone = Math.random() > 0.5 ? primaryEmotion : possibleVariations[Math.floor(Math.random() * possibleVariations.length)];
-          confidence *= 0.9; // Lower confidence for variations
+          confidence *= 0.9;
         }
         
         segments.push({ start, end, tone, confidence });
@@ -149,7 +139,6 @@ const Index = () => {
   };
 
   const handleFileUpload = useCallback(async (file: File) => {
-    // Reset state
     setAnalysisData(null);
     setCurrentTime(0);
     setDuration(0);
@@ -164,10 +153,8 @@ const Index = () => {
     setAudioUrl(url);
     setIsAnalyzing(true);
 
-    // Generate enhanced analysis after a delay
     setTimeout(() => {
-      // Get actual audio duration or estimate
-      const estimatedDuration = 180; // Default to 3 minutes, will update when audio loads
+      const estimatedDuration = 180;
       const analysis = generateAdvancedAnalysis(file.name, estimatedDuration);
       
       setAnalysisData(analysis);
@@ -228,18 +215,64 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-black text-white font-sans">
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl">
         {/* Header */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-4 sm:mb-6">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Music className="w-5 h-5 text-white" />
-            <Sparkles className="w-4 h-4 text-white" />
+            <Music className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
           </div>
-          <h1 className="text-3xl font-display font-bold text-white mb-1 tracking-tight">Music Visualizer</h1>
+          <h1 className="text-2xl sm:text-3xl font-display font-bold text-white mb-1 tracking-tight">
+            Music Visualizer
+          </h1>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6 items-start justify-center">
-          
+        {/* Mobile Layout */}
+        <div className="lg:hidden space-y-4">
+          {/* Upload Section */}
+          <div className="flex justify-center">
+            <div className="w-full max-w-sm">
+              <UploadSection onFileUpload={handleFileUpload} isAnalyzing={isAnalyzing} />
+            </div>
+          </div>
+
+          {/* Visualizer - Full width on mobile */}
+          <div className="bg-gray-900/30 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3 sm:p-4">
+            <DotMatrixVisualizer
+              currentTone={getCurrentTone()}
+              currentTime={currentTime}
+              beats={analysisData?.beats || []}
+              isPlaying={isPlaying}
+            />
+          </div>
+
+          {/* Controls Row */}
+          {audioFile && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex justify-center">
+                <PlaybackControls
+                  isPlaying={isPlaying}
+                  currentTime={currentTime}
+                  duration={duration}
+                  currentTone={getCurrentTone()}
+                  onTogglePlayPause={togglePlayPause}
+                  onSkipForward={skipForward}
+                  onSkipBackward={skipBackward}
+                  onProgressClick={handleProgressClick}
+                />
+              </div>
+              
+              {analysisData && (
+                <div className="flex justify-center">
+                  <AnalysisStats analysisData={analysisData} />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden lg:flex flex-col lg:flex-row gap-6 items-start justify-center">
           {/* Left Column - Controls */}
           <div className="flex flex-col gap-4 w-full lg:w-auto">
             <UploadSection onFileUpload={handleFileUpload} isAnalyzing={isAnalyzing} />
@@ -262,9 +295,6 @@ const Index = () => {
 
           {/* Center - Dot Matrix Visualization */}
           <div className="bg-gray-900/30 backdrop-blur-sm border border-gray-700/50 rounded-lg p-6">
-            <div className="mb-4 text-center">
-              <h3 className="text-xl font-display font-semibold text-white tracking-tight">Dot Matrix Visualization</h3>
-            </div>
             <DotMatrixVisualizer
               currentTone={getCurrentTone()}
               currentTime={currentTime}

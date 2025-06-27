@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 
 interface DotMatrixVisualizerProps {
@@ -16,17 +15,29 @@ const DotMatrixVisualizer: React.FC<DotMatrixVisualizerProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number>();
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Static size optimized for laptop displays
-  const CANVAS_SIZE = 480;
-  const GRID_SIZE = 24;
-  const DOT_SIZE = 8;
+  // Responsive sizing
+  const getCanvasSize = () => {
+    if (typeof window === 'undefined') return { size: 320, gridSize: 16 };
+    
+    const width = window.innerWidth;
+    if (width < 640) { // mobile
+      return { size: Math.min(320, width - 40), gridSize: 16 };
+    } else if (width < 1024) { // tablet
+      return { size: 380, gridSize: 20 };
+    } else { // desktop
+      return { size: 480, gridSize: 24 };
+    }
+  };
+
+  const { size: CANVAS_SIZE, gridSize: GRID_SIZE } = getCanvasSize();
+  const DOT_SIZE = Math.max(4, CANVAS_SIZE / GRID_SIZE * 0.4);
   const SPACING = CANVAS_SIZE / GRID_SIZE;
 
   const getCurrentBeatIntensity = () => {
     if (!beats.length || !isPlaying) return 0;
     
-    // Find the closest beat to current time
     let closestBeat = beats[0];
     let minDiff = Math.abs(currentTime - beats[0]);
     
@@ -38,7 +49,6 @@ const DotMatrixVisualizer: React.FC<DotMatrixVisualizerProps> = ({
       }
     }
     
-    // Create a smooth decay from beat impact
     const timeDiff = Math.abs(currentTime - closestBeat);
     if (timeDiff < 0.3) {
       return Math.max(0, 1 - (timeDiff / 0.3)) * 0.8;
@@ -230,13 +240,38 @@ const DotMatrixVisualizer: React.FC<DotMatrixVisualizerProps> = ({
     }
   };
 
-  useEffect(() => {
+  const resizeCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    canvas.width = CANVAS_SIZE;
-    canvas.height = CANVAS_SIZE;
+    const { size } = getCanvasSize();
+    canvas.width = size;
+    canvas.height = size;
+    
+    // Restart animation to apply new size
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    draw();
+  };
 
+  useEffect(() => {
+    resizeCanvas();
+    
+    const handleResize = () => {
+      resizeCanvas();
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
@@ -251,11 +286,16 @@ const DotMatrixVisualizer: React.FC<DotMatrixVisualizerProps> = ({
   }, [currentTone, currentTime, isPlaying, beats]);
 
   return (
-    <div className="flex justify-center items-center">
+    <div ref={containerRef} className="flex justify-center items-center w-full">
       <canvas
         ref={canvasRef}
-        className="border border-gray-600 rounded-lg bg-black"
-        style={{ width: '480px', height: '480px' }}
+        className="border border-gray-600 rounded-lg bg-black transition-all duration-300 ease-in-out"
+        style={{ 
+          width: `${CANVAS_SIZE}px`, 
+          height: `${CANVAS_SIZE}px`,
+          maxWidth: '100%',
+          height: 'auto'
+        }}
       />
     </div>
   );
