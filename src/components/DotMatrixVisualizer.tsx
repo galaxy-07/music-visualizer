@@ -293,8 +293,7 @@ const DotMatrixVisualizer: React.FC<DotMatrixVisualizerProps> = ({
         style={{ 
           width: `${CANVAS_SIZE}px`, 
           height: `${CANVAS_SIZE}px`,
-          maxWidth: '100%',
-          height: 'auto'
+          maxWidth: '100%'
         }}
       />
     </div>
