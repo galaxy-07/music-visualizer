@@ -264,9 +264,6 @@ const Index = () => {
           <div className="bg-gray-900/30 backdrop-blur-sm border border-gray-700/50 rounded-lg p-6">
             <div className="mb-4 text-center">
               <h3 className="text-lg font-semibold text-white">Dot Matrix Visualization</h3>
-              <p className="text-sm text-gray-400">
-                {analysisData ? 'Visual representation of rhythm and emotion' : 'Upload a track to begin'}
-              </p>
             </div>
             <DotMatrixVisualizer
               currentTone={getCurrentTone()}
